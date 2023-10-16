@@ -34,14 +34,16 @@ public class SocketThread implements Runnable {
 
                 if (parts.length == 3) {
                     var method = HttpMethod.valueOf(parts[0]);
-                    var path = parts[1];
+
+                    var path = parts[1].indexOf('?') == -1 ? parts[1] : parts[1].substring(0, parts[1].indexOf('?'));
+                    var query = parts[1].indexOf('?') == -1 ? "" : parts[1].substring(parts[1].indexOf('?') + 1);
 
                     serverRequestHandlers.stream().filter(h -> h.getHttpMethod() == method && h.getPath().equals(path)).findAny()
                             .ifPresentOrElse(serverRequestHandler -> {
-                                serverRequestHandler.getRequestHandler().run(new Request(method, path), out);
+                                serverRequestHandler.getRequestHandler().run(new Request(method, path, query), out);
                             }, () -> {
                                 if (method == HttpMethod.GET) {
-                                    new GetFileRequestHandler().run(new Request(method, path), out);
+                                    new GetFileRequestHandler().run(new Request(method, path, query), out);
                                 }
                             });
                 }
