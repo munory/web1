@@ -4,7 +4,7 @@ import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Request {
@@ -13,12 +13,14 @@ public class Request {
 
     final private String path;
 
-    final private String query;
+    final private List<NameValuePair> queryParams = new ArrayList<>();
 
     public Request(HttpMethod httpMethod, String path, String query) {
         this.httpMethod = httpMethod;
         this.path = path;
-        this.query = query;
+        if (query != null) {
+            this.queryParams.addAll(URLEncodedUtils.parse(query, StandardCharsets.UTF_8));
+        }
     }
 
     public HttpMethod getHttpMethod() {
@@ -30,15 +32,11 @@ public class Request {
     }
 
     public List<NameValuePair> getQueryParams() {
-        if (query != null) {
-            return URLEncodedUtils.parse(query, StandardCharsets.UTF_8);
-        } else {
-            return Collections.emptyList();
-        }
+        return queryParams;
     }
 
     public NameValuePair getQueryParam(String name) {
-        for (NameValuePair param : getQueryParams()) {
+        for (NameValuePair param : queryParams) {
             if (param.getName().equals(name)) {
                 return param;
             }
